@@ -1,3 +1,10 @@
+<!-- Agrega esto en public/index.html o en tu archivo HTML base -->
+<!-- CDN de Bootstrap Icons para evitar errores de carga -->
+<!-- Puedes ignorar esto si ya lo agregaste -->
+<!--
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+-->
+
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
@@ -18,10 +25,13 @@ const nuevoAlumno = ref({
 
 const editado = ref(false);
 
+// Dirección IP común para todas las peticiones
+const API_URL = 'http://localhost:8080/alumnos';
+
 // Cargar alumnos desde la API
 const cargarAlumnos = async () => {
   try {
-    const response = await axios.get('http://localhost:8082/alumnos/traer-alumnos');
+    const response = await axios.get(`${API_URL}/traer-alumnos`);
     alumnos.value = response.data;
   } catch (error) {
     console.error('Error al cargar alumnos:', error);
@@ -33,7 +43,7 @@ const cargarAlumnos = async () => {
 const agregarAlumno = async () => {
   try {
     if (editado.value) {
-      await axios.put(`http://localhost:8082/alumnos/editar-alumnos/${nuevoAlumno.value.id}`, nuevoAlumno.value);
+      await axios.put(`${API_URL}/editar-alumnos/${nuevoAlumno.value.id}`, nuevoAlumno.value);
       Swal.fire({
         icon: 'success',
         title: 'Alumno actualizado',
@@ -41,7 +51,7 @@ const agregarAlumno = async () => {
         timer: 1500
       });
     } else {
-      await axios.post('http://localhost:8082/alumnos/insertar-alumnos', nuevoAlumno.value);
+      await axios.post(`${API_URL}/insertar-alumnos`, nuevoAlumno.value);
       Swal.fire({
         icon: 'success',
         title: 'Alumno agregado',
@@ -63,7 +73,7 @@ const agregarAlumno = async () => {
     };
     editado.value = false;
   } catch (error) {
-    console.error('Error al guardar alumno:', error);
+    console.error('Error al guardar alumno:', error.response?.data || error.message);
     Swal.fire('Error', 'Hubo un problema al guardar los datos del alumno.', 'error');
   }
 };
@@ -95,7 +105,7 @@ const eliminarAlumno = async (id) => {
 // Eliminar alumno por ID
 const eliminarAlumnoPorId = async (id) => {
   try {
-    await axios.delete(`http://localhost:8082/alumnos/eliminar-alumnos/${id}`);
+    await axios.delete(`${API_URL}/eliminar-alumnos/${id}`);
     await cargarAlumnos();
   } catch (error) {
     console.error('Error al eliminar alumno:', error);
@@ -114,33 +124,23 @@ onMounted(cargarAlumnos);
           <h2 class="text-center">Formulario de Alumnos</h2>
           <form @submit.prevent="agregarAlumno">
             <div class="row">
-              <div class="col-md-6 mb-3">
-                <label for="numeroControl" class="form-label">Número de Control</label>
-                <input type="number" class="form-control" id="numeroControl" v-model="nuevoAlumno.numeroControl" required>
-              </div>
-              <div class="col-md-6 mb-3">
-                <label for="nombre" class="form-label">Nombre</label>
-                <input type="text" class="form-control" id="nombre" v-model="nuevoAlumno.nombre" required>
-              </div>
-              <div class="col-md-6 mb-3">
-                <label for="apellidos" class="form-label">Apellidos</label>
-                <input type="text" class="form-control" id="apellidos" v-model="nuevoAlumno.apellidos" required>
-              </div>
-              <div class="col-md-6 mb-3">
-                <label for="telefono" class="form-label">Teléfono</label>
-                <input type="number" class="form-control" id="telefono" v-model="nuevoAlumno.telefono" required>
-              </div>
-              <div class="col-md-6 mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="email" v-model="nuevoAlumno.email" required>
-              </div>
-              <div class="col-md-6 mb-3">
-                <label for="carrera" class="form-label">Carrera</label>
-                <input type="text" class="form-control" id="carrera" v-model="nuevoAlumno.carrera" required>
-              </div>
-              <div class="col-md-6 mb-3">
-                <label for="imagenURL" class="form-label">Imagen URL</label>
-                <input type="text" class="form-control" id="imagenURL" v-model="nuevoAlumno.imagenURL">
+              <div class="col-md-6 mb-3" v-for="(label, key) in {
+                  numeroControl: 'Número de Control',
+                  nombre: 'Nombre',
+                  apellidos: 'Apellidos',
+                  telefono: 'Teléfono',
+                  email: 'Email',
+                  carrera: 'Carrera',
+                  imagenURL: 'Imagen URL'
+                }" :key="key">
+                <label :for="key" class="form-label">{{ label }}</label>
+                <input
+                  :type="key === 'email' ? 'email' : (key === 'telefono' || key === 'numeroControl' ? 'number' : 'text')"
+                  class="form-control"
+                  :id="key"
+                  v-model="nuevoAlumno[key]"
+                  :required="key !== 'imagenURL'"
+                >
               </div>
             </div>
             <button type="submit" class="btn btn-primary">
@@ -205,8 +205,6 @@ onMounted(cargarAlumnos);
 
 <style scoped>
 img {
-  object-fit: cover;
-  border-radius: 4px;
+  border-radius: 5px;
 }
-
 </style>
