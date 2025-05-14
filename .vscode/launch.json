@@ -1,0 +1,28 @@
+{
+    // Use IntelliSense para saber los atributos posibles.
+    // Mantenga el puntero para ver las descripciones de los existentes atributos.
+    // Para más información, visite: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "AlumnosApplication",
+            "request": "launch",
+            "mainClass": "com.jaczibeth.alumnos.AlumnosApplication",
+            "projectName": "alumnos"
+        },
+        {
+            "type": "java",
+            "name": "AlumnosApplication",
+            "request": "launch",
+            "mainClass": "com.javier.alumnos.AlumnosApplication",
+            "projectName": "alumnos"
+        },
+        {
+            "type": "nativeimage",
+            "request": "launch",
+            "name": "Launch Native Image",
+            "nativeImagePath": "${workspaceFolder}/build/native-image/application"
+        }
+    ]
+}
